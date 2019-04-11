@@ -127,7 +127,7 @@ void loop() {
     Serial.println(key);
     move(key);
   }
-  
+  robotAngle();
   data_sent();
   delay(1000);  
 }
