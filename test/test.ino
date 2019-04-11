@@ -127,6 +127,7 @@ void loop() {
     Serial.println(key);
     move(key);
   }
+  
   data_sent();
   delay(1000);  
 }
