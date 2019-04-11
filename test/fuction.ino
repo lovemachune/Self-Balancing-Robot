@@ -9,7 +9,7 @@ void data_sent()
     myBT.print(" SpeedB: ");
     myBT.println(speedB);
     myBT.println("Car Angle :");
-    myBT.print(angle_pitch_output);
+    myBT.print(kalAngleX);
 }
 
 void move(char key)
