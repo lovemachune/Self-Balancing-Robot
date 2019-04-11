@@ -87,7 +87,7 @@ void setup() {
   motorB.SetEncoderPins(B_Interrupt, B_Direction);
   attachInterrupt(digitalPinToInterrupt(motorA.GetEncoderInterruptPin()), updateA, RISING);
   attachInterrupt(digitalPinToInterrupt(motorB.GetEncoderInterruptPin()), updateB, RISING);
-  Serial.begin(9600);
+  Serial.begin(57600);
   myBT.begin(57600);
 }
 
