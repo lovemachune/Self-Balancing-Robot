@@ -88,6 +88,16 @@ for i=1 : (data_length)
 end
 B = pinv(transpose(G2)*G2)*transpose(G2)*E;
 
+a1 = A(1);
+a2 = A(2);
+a3 = A(3);
+a4 = A(4);
+a5 = A(5);
+a6 = B(1);
+a7 = B(2);
+a8 = B(3);
+a9 = B(4);
+a10 = B(5);
 
 objs = instrfind;
 fclose(objs);
