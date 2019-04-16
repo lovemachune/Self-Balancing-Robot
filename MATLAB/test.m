@@ -19,11 +19,11 @@ objs = instrfind;
 fclose(objs);
 
 
-x = 0:0.01:9.99;
+x = 0:0.005:4.995;
 y = data(:,3);
 plot(x,y)
 %©Ò»Ý½d³ò¨ú­È
-dt = 0.01;
+dt = 0.005;
 data_h = 460;
 data_t = 700;
 data_length = data_t-data_h+1;
