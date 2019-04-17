@@ -2,7 +2,7 @@ clear;clc;
 s = serial('COM4','BaudRate',57600,'Terminator','CR');
 fopen(s);
 %讀取資料 1000筆 => 10s
-data_length = 1000;
+data_length = 500;
 data=zeros(data_length,3);
 fscanf(s);
 fscanf(s);
@@ -11,21 +11,33 @@ fscanf(s);
 for i=1:data_length
     str = fscanf(s);
     token = split(str);
+    if(size(token)<4)
+        i=i-1;
+        continue;
+    end
     data(i,1) = str2double(token(2));
     data(i,2) = str2double(token(3));
     data(i,3) = str2double(token(4));
+    if(isnan(data(i,1)) ||  isnan(data(i,2)) ||  isnan(data(i,3)))
+        i=i-1;
+    end
 end
 objs = instrfind;
 fclose(objs);
 
+%for i = 1:1000
+%    data(i,1) = data(i,1)/180*pi;
+%    data(i,2) = data(i,2)/180*pi;
+%    data(i,3) = data(i,3)/180*pi;
+%end
 
-x = 0:0.005:4.995;
+x = 0:0.01:4.99;
 y = data(:,3);
 plot(x,y)
 %所需範圍取值
-dt = 0.005;
-data_h = 460;
-data_t = 700;
+dt = 0.01;
+data_h = 96;
+data_t = 272;
 data_length = data_t-data_h+1;
 x = x(data_h:data_t);
 %平滑公式
@@ -45,7 +57,7 @@ phi = data(data_h:data_t,3);
 dthetaA = zeros(data_length,1);
 dthetaB = zeros(data_length,1);
 dphi = zeros(data_length,1);
-for i=1 : (size(phi)-1)
+for i=1 : (data_length-1)
     dthetaA(i) = (thetaA(i+1)-thetaA(i))/dt;
     dthetaB(i) = (thetaB(i+1)-thetaB(i))/dt;
     dphi(i) = (phi(i+1)-phi(i))/dt;
@@ -58,7 +70,7 @@ dphi(data_length) = (phi(data_length)-phi(data_length-1))/dt;
 ddthetaA = zeros(data_length,1);
 ddthetaB = zeros(data_length,1);
 ddphi = zeros(data_length,1);
-for i=1 : (size(phi)-1)
+for i=1 : (data_length-1)
     ddthetaA(i) = (dthetaA(i+1)-dthetaA(i))/dt;
     ddthetaB(i) = (dthetaB(i+1)-dthetaB(i))/dt;
     ddphi(i) = (dphi(i+1)-dphi(i))/dt;
@@ -98,6 +110,11 @@ a7 = B(2);
 a8 = B(3);
 a9 = B(4);
 a10 = B(5);
+%simulink結果和phi疊圖
+phi = phi/180*pi;
+plot(tout(1:20000),ScopeData1(1:20000,2))
+hold on
+plot(x,phi)
 
 objs = instrfind;
 fclose(objs);
