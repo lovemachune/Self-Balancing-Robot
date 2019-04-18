@@ -22,34 +22,31 @@ end
 objs = instrfind;
 fclose(objs);
 
-%for i = 1:1000
-%    data(i,1) = data(i,1)/180*pi;
-%    data(i,2) = data(i,2)/180*pi;
-%    data(i,3) = data(i,3)/180*pi;
-%end
 
 x = 0:0.01:4.99;
 y = data(:,3);
 plot(x,y)
 %所需範圍取值
+x = 0:0.01:4.99;
 dt = 0.01;
-data_h = 96;
-data_t = 272;
+data_h = 85;
+data_t = 285;
 data_length = data_t-data_h+1;
 x = x(data_h:data_t);
+%輸入電壓
+v = 0;
+%{
 %平滑公式
 for i=data_h+1:data_t
     data(i,1) = data(i,1)*0.3 + data(i-1,1)*0.7;
     data(i,2) = data(i,2)*0.3 + data(i-1,2)*0.7;
     data(i,3) = data(i,3)*0.3 + data(i-1,3)*0.7;
 end
-%輸入電壓
-v = 0;
-
+%}
 U = zeros(data_length,1) + v;
-thetaA = data(data_h:data_t,1);
-thetaB = data(data_h:data_t,2);
-phi = data(data_h:data_t,3);
+thetaA = data(data_h:data_t,1)/180*pi;
+thetaB = data(data_h:data_t,2)/180*pi;
+phi = data(data_h:data_t,3)/180*pi;
 
 dthetaA = zeros(data_length,1);
 dthetaB = zeros(data_length,1);
@@ -76,8 +73,8 @@ ddthetaA(data_length) = (dthetaA(data_length)-dthetaA(data_length-1))/dt;
 ddthetaB(data_length) = (dthetaB(data_length)-dthetaB(data_length-1))/dt;
 ddphi(data_length) = (dphi(data_length)-dphi(data_length-1))/dt;
 
-E = ddphi;
-G1 = zeros(data_length,5);
+%%%Original Matrix%%%
+%{
 for i=1 : (data_length)
     G1(i,1) = -ddthetaA(i);
     G1(i,2) = -2*cos(phi(i))*ddphi(i)+sin(2*phi(i))*sec(phi(i))*(dphi(i)^2);
@@ -85,17 +82,50 @@ for i=1 : (data_length)
     G1(i,4) = dphi(i);
     G1(i,5) = U(i);
 end
+%}
+
+%%%%%%%%%%%For 0V%%%%%%%%%%%%%%%%%
+%{
+%%%G1(1) G1(3) G1(5) (a1 a3 a5) can be ignore because theta=0 and V=0
+E = ddphi;
+G1 = zeros(data_length,2);
+for i=1 : (data_length)
+    G1(i,1) = -2*cos(phi(i))*ddphi(i)+sin(2*phi(i))*sec(phi(i))*(dphi(i)^2);
+    G1(i,2) = dphi(i);
+end
 A = pinv(transpose(G1)*G1)*transpose(G1)*E;
 
-G2 = zeros(data_length,5);
+%%%G2(1) G2(2) G2(5) (a6 a7 a10) can be ignore  and G2(3) = -dphi (a8)
+G2 = zeros(data_length,2);
 for i=1 : (data_length)
-    G2(i,1) = -ddthetaA(i);
-    G2(i,2) = -cos(phi(i))*ddphi(i);
-    G2(i,3) = dthetaA(i)-dphi(i);
+    G2(i,3) = -dphi(i);
     G2(i,4) = sin(phi(i));
-    G2(i,5) = U(i);
+end
+B = inv(transpose(G2)*G2)*transpose(G2)*E;
+%}
+%%%%%%%%%%%Others%%%%%%%%%%%%
+%{
+%%%已知 a2(A(1)) a4(A(2)) 求 a1 a3 a5
+E = zeros(data_length,1);
+G1 = zeros(data_length,3);
+for i=1 : (data_length)
+    E = ddphi(i) + A(1)*2*cos(phi(i))*ddphi(i)+sin(2*phi(i))*sec(phi(i))*(dphi(i)^2) - A(2)*dphi(i);
+    G1(i,1) = -ddthetaA(i);
+    G1(i,2) = -dthetaA(i);
+    G1(i,3) = U(i);
+end
+A = pinv(transpose(G1)*G1)*transpose(G1)*E;
+
+%%%已知 a8(B(1)) a9(B(2)) 求 a6 a7 a10
+G2 = zeros(data_length,3);
+for i=1 : (data_length)
+    E = ddphi(i) + B(1)*dphi(i) -B(2)*sin(phi(i));
+    G2(i,1) = -ddthetaA(i);
+    G2(i,2) = -cos(phi(i))*ddthetaA;
+    G2(i,3) = -U(i);
 end
 B = pinv(transpose(G2)*G2)*transpose(G2)*E;
+%}
 
 a1 = A(1);
 a2 = A(2);
@@ -137,8 +167,8 @@ matrixA = [0 1 0 0;
 matrixB = [0;m4/k1;0;n4/k2];
 matrixC = [1 0 1 0];
 matrixD = 0;
-G = ss(matrixA, matrixB, matrixC, matrixD);
-rlocus(G)
+[G,H] = ss2tf(matrixA, matrixB, matrixC, matrixD,1);
+rlocus(G,H)
 
 objs = instrfind;
 fclose(objs);
