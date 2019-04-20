@@ -99,5 +99,10 @@ void loop() {
     Serial.println(key);
     move(key);
   }
-  delay(1000);  
+  move('w');
+  delay(1000);
+  move('x');
+  delay(2000);
+  motorA.clears();
+  motorB.clears();
 }
