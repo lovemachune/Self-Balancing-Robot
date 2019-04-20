@@ -42,3 +42,7 @@ void BalanbotEncoder::Update(){
   if (digitalRead(mDirectionPin) == HIGH) --count;
   else ++count;
 }
+void BalanbotEncoder::clear()
+{
+  count = 0;
+}

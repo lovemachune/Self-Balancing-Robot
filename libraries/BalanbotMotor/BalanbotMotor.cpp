@@ -136,3 +136,7 @@ void BalanbotMotor::stop()
 {
   digitalWrite(mStandbyPin, LOW);
 }
+void BalanbotMotor::clears()
+{
+  mEncoder.clear();
+}

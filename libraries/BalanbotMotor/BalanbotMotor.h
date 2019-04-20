@@ -45,6 +45,8 @@ class BalanbotMotor{
     void move(int speed, int direction);
     void stop();
     
+    void clears();
+
     PIDController angleController;
     PIDController speedController;
 };

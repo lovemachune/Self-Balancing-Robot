@@ -22,6 +22,7 @@ class BalanbotEncoder{
     int GetPPR();
     void ClearPosition();
     int GetCount();
+    void clear();
 };
 
 #endif 
