@@ -1,36 +1,16 @@
-/*void setup_mpu_6050_registers(){
-    //Activate the MPU-6050
-    Wire.beginTransmission(0x68);                                        //Start communicating with the MPU-6050
-    Wire.write(0x6B);                                                    //Send the requested starting register
-    Wire.write(0x00);                                                    //Set the requested starting register
-    Wire.endTransmission();                                             
-    //Configure the accelerometer (+/-8g)
-    Wire.beginTransmission(0x68);                                        //Start communicating with the MPU-6050
-    Wire.write(0x1C);                                                    //Send the requested starting register
-    Wire.write(0x10);                                                    //Set the requested starting register
-    Wire.endTransmission();                                             
-    //Configure the gyro (500dps full scale)
-    Wire.beginTransmission(0x68);                                        //Start communicating with the MPU-6050
-    Wire.write(0x1B);                                                    //Send the requested starting register
-    Wire.write(0x08);                                                    //Set the requested starting register
-    Wire.endTransmission();                                             
-}
+//MPU 
+#define RESTRICT_PITCH
+Kalman kalmanX; // Create the Kalman instances
+Kalman kalmanY;
+double accX, accY, accZ;
+double gyroX, gyroY, gyroZ;
+int16_t powerRaw, tempRaw;
+double gyroXangle, gyroYangle; // Angle calculate using the gyro only
+double compAngleX, compAngleY; // Calculated angle using a complementary filter
+double kalAngleX, kalAngleY; // Calculated angle using a Kalman filter
+uint32_t timer;
+uint8_t i2cData[14]; // Buffer for I2C data
 
-
-void read_mpu_6050_data(){                                             //Subroutine for reading the raw gyro and accelerometer data
-    Wire.beginTransmission(0x68);                                        //Start communicating with the MPU-6050
-    Wire.write(0x3B);                                                    //Send the requested starting register
-    Wire.endTransmission();                                              //End the transmission
-    Wire.requestFrom(0x68,14);                                           //Request 14 bytes from the MPU-6050
-    while(Wire.available() < 14);                                        //Wait until all the bytes are received
-    acc_x = Wire.read()<<8|Wire.read();                                  
-    acc_y = Wire.read()<<8|Wire.read();                                  
-    acc_z = Wire.read()<<8|Wire.read();                                  
-    temp = Wire.read()<<8|Wire.read();                                   
-    gyro_x = Wire.read()<<8|Wire.read();                                 
-    gyro_y = Wire.read()<<8|Wire.read();                                 
-    gyro_z = Wire.read()<<8|Wire.read();                                 
-}*/
 const uint8_t IMUAddress = 0x68; // AD0 is logic low on the PCB
 const uint16_t I2C_TIMEOUT = 1000; // Used to check for errors in I2C communication
 
@@ -127,7 +107,7 @@ void mpuSetup()
 
   timer = micros();                                            //Reset the loop timer
 }
-void robotAngle()
+double robotAngle()
 {
     /* Update all the values */
   while (i2cRead(0x3B, i2cData, 14));
@@ -165,7 +145,9 @@ void robotAngle()
     gyroXangle = roll;
   } else
     kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter
-
+  return kalAngleX;
+#endif
+  /*
   if (abs(kalAngleX) > 90)
     gyroYrate = -gyroYrate; // Invert rate, so it fits the restriced accelerometer reading
   kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt);
@@ -196,5 +178,5 @@ void robotAngle()
   if (gyroXangle < -180 || gyroXangle > 180)
     gyroXangle = kalAngleX;
   if (gyroYangle < -180 || gyroYangle > 180)
-    gyroYangle = kalAngleY;
+    gyroYangle = kalAngleY;*/
 }

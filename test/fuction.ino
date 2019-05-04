@@ -5,7 +5,7 @@ void data_sent()
     myBT.print(currentAngleB);
     myBT.print(" ");
     //myBT.print("Car Angle :");
-    myBT.println(kalAngleX);
+    myBT.println(robotAngle());
 }
 
 void move(char key)
