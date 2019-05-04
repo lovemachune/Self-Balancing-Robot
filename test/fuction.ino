@@ -13,24 +13,24 @@ void move(char key)
   switch(key)
   {
     case 'w':
-      motorA.move(50,1);
-      motorB.move(50,1);
+      motorA.Rotate(50);
+      motorB.Rotate(50);
       break;
     case 'a':
-      motorA.move(85,1);
-      motorB.move(50,1);
+      motorA.Rotate(85);
+      motorB.Rotate(50);
       break;
     case 's':
-      motorA.move(50,0);
-      motorB.move(50,0);
+      motorA.Rotate(-50);
+      motorB.Rotate(-50);
       break;
     case 'd':
-      motorA.move(50,1);
-      motorB.move(85,1);
+      motorA.Rotate(50);
+      motorB.Rotate(85);
       break;
     case 'x':
-      motorA.stop();
-      motorB.stop();
+      motorA.Brake();
+      motorB.Brake();
       break; 
   }
 }
