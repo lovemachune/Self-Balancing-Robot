@@ -2,7 +2,6 @@
 #define BALANBOTCONTROLLER_H
 
 #include <NumericalTool.h>
-
 class PIDController{
 	const float ERROR_TOLERANCE = 0.5;
 
@@ -18,7 +17,7 @@ class PIDController{
 		PIDController();
 		void SetPID(float kp, float ki, float kd);
 		void SetReference(float reference);
-		void GetIfSteady();
+		bool GetIfSteady();
 		float Update(float feedback);
 };
 

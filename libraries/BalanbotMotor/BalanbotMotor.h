@@ -18,7 +18,6 @@ class BalanbotMotor{
     void UpdateAngle();
     void UpdateSpeed();
     void UpdateControl();
-
   public:  
     BalanbotMotor();
     inline void SetPWMPin(const int pin);
@@ -31,7 +30,7 @@ class BalanbotMotor{
                        const int standbyPin);
     void SetEncoderPins(const int interruptPin, 
                         const int directionPin);
-    void SetControl(int mode, float reference);
+    void SetControl(int mode, float reference, float kp, float ki, float kd);
     void InverseRotationDirectionDefinition(const bool ifInverse);
     int GetEncoderInterruptPin();
     float GetSpeed();
@@ -39,11 +38,11 @@ class BalanbotMotor{
     void Rotate(const int voltage);
     void Brake();
     void UpdateEncoder();
-    void Update();
+    void Update(float phi);
+    void UpdateControl(float phi);
     
     int GetWheelAngle();
     void move(int speed, int direction);
-    void stop();
     
     void clears();
 
