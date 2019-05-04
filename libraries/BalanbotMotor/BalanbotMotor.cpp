@@ -118,7 +118,7 @@ void BalanbotMotor::UpdateEncoder(){
 void BalanbotMotor::UpdateControl(float phi)
 {
   //TODO
-  int power = (int)angleController.Update(phi);
+  int power = 51*(int)angleController.Update(phi);
   Rotate(-power);
 }
 
