@@ -13,6 +13,9 @@
 #define BT_SPECIFICATION "HC05"
 //Bluetooth myBT(BT_RX, BT_TX, BT_SPECIFICATION);
 SoftwareSerial myBT(12,13);
+char val;
+String bluetooth_data = "";
+bool inReceive = false;
 
 //create Motor
 BalanbotMotor motorA;
@@ -28,10 +31,13 @@ char key;
 
 //pid
 int mode = 0;
-float reference = -0.5*pi/180;
+double reference = 0.1*pi/180;
 double interror = 0 ;
 double olderror = 0;
-float kp = 30, ki = 0.015, kd = 0.03;
+/*double kpA = 665.4, kiA = 2460.1, kdA = 32.9;
+double kpB = 660.4, kiB = 2460.1, kdB = 32.8;*/
+double kpA = 18, kiA = 107, kdA = 0.58;
+double kpB = 18, kiB = 107, kdB = 0.56;
 
 void TimerInterrupt()
 {
@@ -43,7 +49,7 @@ void TimerInterrupt()
     speedA = (currentAngleA - lastAngleA)/dT/360; 
     speedB = (currentAngleB - lastAngleB)/dT/360; 
     double phi = robotAngle()*pi/180;
-    Serial.println(phi);
+    //Serial.println(phi);
     motorA.Update(phi);
     motorB.Update(phi);
 }
@@ -59,10 +65,5 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(myBT.available())
-  {
-    key = myBT.read();
-    Serial.println(key);
-    move(key);
-  }
+  btData();
 }
