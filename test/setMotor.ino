@@ -34,8 +34,8 @@ void setMotor()
     motorA.InverseRotationDirectionDefinition(false);
     motorB.InverseRotationDirectionDefinition(false);
 
-    motorA.SetControl(mode, reference,kpA,kiA,kdA);
-    motorB.SetControl(mode, reference,kpB,kiB,kdB);
+    motorA.SetControl(mode, reference,kpA,kiA,kdA,theta_reference,theta_kpA, theta_kiA, theta_kdA);
+    motorB.SetControl(mode, reference,kpB,kiB,kdB,theta_reference,theta_kpB, theta_kiB, theta_kdB);
 
     attachInterrupt(digitalPinToInterrupt(motorA.GetEncoderInterruptPin()), updateA, RISING);
     attachInterrupt(digitalPinToInterrupt(motorB.GetEncoderInterruptPin()), updateB, RISING);
