@@ -7,14 +7,17 @@
 #include <Arduino.h>
 
 class BalanbotMotor{
+  public:
+    static const int PHI_CONTROL = 0,
+              PHI_AND_THETA_CONTROL = 1;
   private:
     BalanbotEncoder mEncoder; 
     Differentiator mDifferentiator;
-    float mDirectionCoefficient;
+    double mDirectionCoefficient;
     int mPwmPin, mDirectionPinA, mDirectionPinB, mStandbyPin;
     int mControlMode;
-    float mSpeed;
-    float mAngle;
+    double mSpeed;
+    double mAngle;
     void UpdateAngle();
     void UpdateSpeed();
     void UpdateControl();
@@ -30,16 +33,17 @@ class BalanbotMotor{
                        const int standbyPin);
     void SetEncoderPins(const int interruptPin, 
                         const int directionPin);
-    void SetControl(int mode, float reference, float kp, float ki, float kd);
+    void SetControl(int mode, double reference, double kp, double ki, double kd,double theta_reference,double theta_kp,double theta_ki,double theta_kd);
     void InverseRotationDirectionDefinition(const bool ifInverse);
     int GetEncoderInterruptPin();
-    float GetSpeed();
-    float GetAngle();
-    void Rotate(const int voltage);
+    double GetSpeed();
+    double GetAngle();
+    void GetEffort(double &pEffort ,double &iEffort ,double &dEffort,double &effort );
+    void Rotate(int voltage);
     void Brake();
     void UpdateEncoder();
-    void Update(float phi);
-    void UpdateControl(float phi);
+    void Update(double phi,double theta);
+    void UpdateControl(double phi,double theta);
     
     int GetWheelAngle();
     void move(int speed, int direction);

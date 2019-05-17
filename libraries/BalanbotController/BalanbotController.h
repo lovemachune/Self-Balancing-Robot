@@ -3,22 +3,25 @@
 
 #include <NumericalTool.h>
 class PIDController{
-	const float ERROR_TOLERANCE = 0.5;
+	const double ERROR_TOLERANCE = 0.5;
 
 	private:
 		bool mSteady;
-		float mReference;
-		float mKp, mKi, mKd;
-		float mError;
+		double mReference;
+		double mKp, mKi, mKd;
+		double mError;
 		Differentiator mDifferentiator;
     	Integrator mIntegrator;  
+		double PEffort ,IEffort ,DEffort,Effort;
 
 	public: 
 		PIDController();
-		void SetPID(float kp, float ki, float kd);
-		void SetReference(float reference);
+		void SetPID(double kp, double ki, double kd);
+		void SetReference(double reference);
 		bool GetIfSteady();
-		float Update(float feedback);
+		void GetEffort(double &pEffort ,double &iEffort ,double &dEffort,double &effort);
+		double Update(double feedback);
+		
 };
 
 #endif //CONTROLLER_H

@@ -51,11 +51,22 @@ void BalanbotMotor::SetEncoderPins( const int interruptPin,
   mEncoder.SetDirectionPin(directionPin); 
 }
 
-void BalanbotMotor::SetControl(int mode, float reference, float kp, float ki, float kd)
+void BalanbotMotor::SetControl(int mode, double reference, double kp, double ki, double kd,double theta_reference=0,double theta_kp=0,double theta_ki=0,double theta_kd=0)
 {
   //TODO
-  angleController.SetPID(kp,ki,kd);
-  angleController.SetReference(reference);
+  mControlMode = mode;
+  if(mControlMode == PHI_CONTROL)
+  {
+    angleController.SetPID(kp,ki,kd);
+    angleController.SetReference(reference);
+  }
+  else if(mControlMode == PHI_AND_THETA_CONTROL)
+  {
+    angleController.SetPID(kp,ki,kd);
+    angleController.SetReference(reference);
+    speedController.SetPID(theta_kp,theta_ki,theta_kd);
+    speedController.SetReference(theta_reference);
+  }
 }
 
 void BalanbotMotor::InverseRotationDirectionDefinition(const bool ifInverse){
@@ -65,29 +76,23 @@ void BalanbotMotor::InverseRotationDirectionDefinition(const bool ifInverse){
     mDirectionCoefficient = 1.0;
 }
 
-int BalanbotMotor::GetEncoderInterruptPin() 
-{ 
-  return mEncoder.GetInterruptPin();
-}
 
-float BalanbotMotor::GetSpeed() 
-{
-  return mSpeed;
-} 
-
-float BalanbotMotor::GetAngle() 
-{
-  return mAngle;
-}
-
-void BalanbotMotor::Rotate(const int voltage){
+void BalanbotMotor::Rotate(int voltage){
   //TODO
   bool inPin1 = HIGH, inPin2 = LOW;
   digitalWrite(mStandbyPin, HIGH);    
-  if(mDirectionCoefficient*voltage < 0)
+  if(voltage > 255)
+  {
+    voltage = 255;
+  }
+  else if(mDirectionCoefficient*voltage < 0)
   {
     inPin1 = LOW;
     inPin2 = HIGH;
+    if(voltage < -255)
+      voltage = 255;
+    else
+      voltage = -voltage;
   }
   digitalWrite(mDirectionPinA, inPin1);
   digitalWrite(mDirectionPinB, inPin2);
@@ -103,8 +108,8 @@ void BalanbotMotor::UpdateAngle(){
   int encoderPosition = mEncoder.GetPosition();
   mAngle =  mDirectionCoefficient 
             * (2*PI) 
-            * ( static_cast<float>(encoderPosition) 
-              / static_cast<float>(mEncoder.GetPPR()) );
+            * ( static_cast<double>(encoderPosition) 
+              / static_cast<double>(mEncoder.GetPPR()) );
 }
 
 void BalanbotMotor::UpdateSpeed(){
@@ -115,22 +120,21 @@ void BalanbotMotor::UpdateEncoder(){
   mEncoder.Update();
 }
 
-void BalanbotMotor::UpdateControl(float phi)
+void BalanbotMotor::UpdateControl(double phi,double theta)
 {
   //TODO
-  int power = 51*(int)angleController.Update(phi);
+  int power;
+  if(mControlMode == PHI_CONTROL)
+    power = (int)angleController.Update(phi);
+  else if(mControlMode == PHI_AND_THETA_CONTROL)
+    power = (int)(0.7*angleController.Update(phi))+(int)(0.3*speedController.Update(theta));
   Rotate(-power);
 }
 
-void BalanbotMotor::Update(float phi){
+void BalanbotMotor::Update(double phi,double theta=0){
   UpdateAngle();
   UpdateSpeed();
-  UpdateControl(phi);
-}
-int BalanbotMotor::GetWheelAngle()
-{
-  float count = mEncoder.GetCount();
-  return 2*PI*(count/SECTION_NUMBER)*RAD_TO_DEG;
+  UpdateControl(phi,theta);
 }
 
 void BalanbotMotor::move(int speed, int direction)
@@ -149,4 +153,28 @@ void BalanbotMotor::move(int speed, int direction)
 void BalanbotMotor::clears()
 {
   mEncoder.clear();
+}
+
+int BalanbotMotor::GetEncoderInterruptPin() 
+{ 
+  return mEncoder.GetInterruptPin();
+}
+
+double BalanbotMotor::GetSpeed() 
+{
+  return mSpeed;
+} 
+
+double BalanbotMotor::GetAngle() 
+{
+  return mAngle;
+}
+void BalanbotMotor::GetEffort(double &pEffort ,double &iEffort ,double &dEffort ,double &effort)
+{
+  angleController.GetEffort(pEffort ,iEffort ,dEffort,effort);
+}
+int BalanbotMotor::GetWheelAngle()
+{
+  double count = mEncoder.GetCount();
+  return 2*PI*(count/SECTION_NUMBER)*RAD_TO_DEG;
 }

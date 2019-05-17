@@ -9,14 +9,14 @@ PIDController::PIDController() :
 
 }
 
-void PIDController::SetPID(float kp, float ki, float kd)
+void PIDController::SetPID(double kp, double ki, double kd)
 {
 	mKp = kp;
 	mKi = ki;
 	mKd = kd;
 }
 
-void PIDController::SetReference(float reference)
+void PIDController::SetReference(double reference)
 {
 	mReference = reference;
 }
@@ -28,17 +28,31 @@ bool PIDController::GetIfSteady()
 	return false;
 }
 
-float PIDController::Update(float feedback)
+double PIDController::Update(double feedback)
 {
-	float pEffort = 0.0;
-	float iEffort = 0.0;
-	float dEffort = 0.0;
-	float effort = 0.0;
+	double pEffort = 0.0;
+	double iEffort = 0.0;
+	double dEffort = 0.0;
+	double effort = 0.0;
 	mError = mReference - feedback;
 	//TODO
 	pEffort = mKp * mError;
 	iEffort = mKi * mIntegrator.integral(mError);
 	dEffort = mKd * mDifferentiator.differential(mError);
 	effort = pEffort + iEffort + dEffort;
-	return effort;
+	
+	//for debug
+	PEffort = pEffort;
+	IEffort = iEffort;
+	DEffort = dEffort;
+	Effort = effort;
+	return 51*effort;
+}
+
+void PIDController::GetEffort(double &pEffort ,double &iEffort ,double &dEffort,double &effort)
+{
+  pEffort = PEffort;
+  iEffort = IEffort;
+  dEffort = DEffort;
+  effort = Effort;
 }
