@@ -20,6 +20,7 @@ class PIDController{
 		void SetReference(double reference);
 		bool GetIfSteady();
 		void GetEffort(double &pEffort ,double &iEffort ,double &dEffort,double &effort);
+		double GetReference();
 		double Update(double feedback);
 		
 };

@@ -56,3 +56,7 @@ void PIDController::GetEffort(double &pEffort ,double &iEffort ,double &dEffort,
   dEffort = DEffort;
   effort = Effort;
 }
+double PIDController::GetReference()
+{
+	return mReference;
+}
