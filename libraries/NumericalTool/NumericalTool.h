@@ -38,8 +38,16 @@ class Integrator{
         float output_[2];
 
     public:
-        Integrator(){ ts_ = 0.01; }
+        Integrator(){ ts_ = 0.005; }
         void setTs(float ts){ ts_ = ts; }
+        void initialStates()
+        {
+            for(int i=0;i<2;i++)
+            {
+                input_[i]=0;
+                output_[i]=0;
+            }
+        }
         float integral(float input){
             output_[0] = ts_*input_[1] + output_[1];
             
