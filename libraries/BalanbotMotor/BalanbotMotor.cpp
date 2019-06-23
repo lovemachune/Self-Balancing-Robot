@@ -52,7 +52,7 @@ void BalanbotMotor::SetEncoderPins( const int interruptPin,
   mEncoder.SetDirectionPin(directionPin); 
 }
 
-void BalanbotMotor::SetControl(int mode, double reference, double kp, double ki, double kd,double theta_reference=0,double theta_kp=0,double theta_ki=0,double theta_kd=0)
+void BalanbotMotor::SetControl(int mode, double reference, double kp, double ki, double kd,double theta_reference,double theta_kp,double theta_ki,double theta_kd)
 {
   //TODO
   mControlMode = mode;
@@ -61,14 +61,7 @@ void BalanbotMotor::SetControl(int mode, double reference, double kp, double ki,
     angleController.SetPID(kp,ki,kd);
     angleController.SetReference(reference);
   }
-  else if(mControlMode == PHI_AND_THETA_CONTROL)
-  {
-    angleController.SetPID(kp,ki,kd);
-    angleController.SetReference(reference);
-    speedController.SetPID(theta_kp,theta_ki,theta_kd);
-    speedController.SetReference(theta_reference);
-  }
-  else if(mControlMode == QUICK_POSITION_CONTROL)
+  else
   {
     angleController.SetPID(kp,ki,kd);
     angleController.SetReference(reference);
@@ -94,22 +87,18 @@ void BalanbotMotor::Rotate(int voltage){
   //TODO
   bool inPin1 = HIGH, inPin2 = LOW;
   digitalWrite(mStandbyPin, HIGH);    
-  if(voltage>0)
-    voltage+=default_pwm;
+  voltage+=default_pwm;
   
-  if(voltage > 250)
-  {
-    voltage = 250;
-  }
-  else if(mDirectionCoefficient*voltage < 0)
+  if(mDirectionCoefficient*voltage < 0)
   {
     inPin1 = LOW;
     inPin2 = HIGH;
-    if(voltage < -250)
-      voltage = 250;
-    else
-      voltage = -voltage;
   }
+  if(voltage < 0)
+      voltage = -voltage;
+  if(voltage > 250)
+      voltage = 250;
+  
   digitalWrite(mDirectionPinA, inPin1);
   digitalWrite(mDirectionPinB, inPin2);
   analogWrite(mPwmPin, voltage);
@@ -141,28 +130,18 @@ void BalanbotMotor::UpdateControl(double phi,double theta)
   //TODO
   int power;
   if(mControlMode == PHI_CONTROL){
-    power = (int)angleController.Update(phi);
+      power = (int)angleController.Update(phi) * 51;
   }
-  else if(mControlMode == PHI_AND_THETA_CONTROL){
-    int theta_power = (int)(0.3*speedController.Update(theta));
-    //set satration of theta_effort
-    if(theta_power < -80)
-       theta_power=-80;
-    else if(theta_power > 80)
-       theta_power=80;
-    power = (int)(0.7*angleController.Update(phi))+theta_power;
-  } 
-  else if(mControlMode == QUICK_POSITION_CONTROL){
+  else{
     double reference;
-    reference = (speedController.GetReference() - theta)/6.28;
-    if(reference > 1)
-      reference = 0.015;
-    else if(reference < -1)
-      reference = -0.015;
-    else
-      reference = reference*0.02;
+    reference = speedController.Update(theta);
+    if(reference > 0.018)
+      reference = 0.018;
+    else if(reference < -0.017)
+      reference = -0.017;      
+    reference = reference;
     angleController.SetReference(reference);
-    power = (int)angleController.Update(phi);
+    power = (int)angleController.Update(phi) * 51;
   }
   //for debug
   POWER = power;
@@ -174,7 +153,7 @@ void BalanbotMotor::Update(double phi,double theta=0){
   UpdateSpeed();
   UpdateControl(phi,theta);
 }
-
+/* 
 void BalanbotMotor::move(int speed, int direction)
 {
   bool inPin1 = HIGH, inPin2 = LOW;
@@ -187,10 +166,12 @@ void BalanbotMotor::move(int speed, int direction)
   digitalWrite(mDirectionPinA, inPin1);
   digitalWrite(mDirectionPinB, inPin2);
   analogWrite(mPwmPin, speed);
-}
+}*/
 void BalanbotMotor::clears()
 {
   mEncoder.clear();
+  angleController.clear();
+  speedController.clear();
 }
 
 int BalanbotMotor::GetEncoderInterruptPin() 
@@ -211,8 +192,6 @@ void BalanbotMotor::GetEffort(double &pEffort ,double &iEffort ,double &dEffort 
 {
   speedController.GetEffort(wpEffort ,wiEffort ,wdEffort,weffort);
   angleController.GetEffort(pEffort ,iEffort ,dEffort,effort);
-  //weffort = weffort*51*0.3;
-  //effort = effort*51*0.7;
   power=POWER;
 }
 int BalanbotMotor::GetWheelAngle()

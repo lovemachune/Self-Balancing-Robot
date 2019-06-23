@@ -46,7 +46,7 @@ double PIDController::Update(double feedback)
 	IEffort = iEffort;
 	DEffort = dEffort;
 	Effort = effort;
-	return 51*effort;
+	return effort;
 }
 
 void PIDController::GetEffort(double &pEffort ,double &iEffort ,double &dEffort,double &effort)
@@ -59,4 +59,10 @@ void PIDController::GetEffort(double &pEffort ,double &iEffort ,double &dEffort,
 double PIDController::GetReference()
 {
 	return mReference;
+}
+
+void PIDController::clear()
+{
+	mIntegrator.initialStates();
+	mDifferentiator.initialStates();
 }

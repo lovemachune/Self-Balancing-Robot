@@ -9,8 +9,7 @@
 class BalanbotMotor{
   public:
     static const int PHI_CONTROL = 0,
-              PHI_AND_THETA_CONTROL = 1,
-              QUICK_POSITION_CONTROL = 2;
+              QUICK_POSITION_CONTROL = 1;
   private:
     int POWER;
     int default_pwm;
@@ -37,7 +36,7 @@ class BalanbotMotor{
                        const int standbyPin);
     void SetEncoderPins(const int interruptPin, 
                         const int directionPin);
-    void SetControl(int mode, double reference, double kp, double ki, double kd,double theta_reference=0,double theta_kp=0,double theta_ki=0,double theta_kd=0);
+    void SetControl(int mode, double reference, double kp, double ki, double kd,double theta_reference,double theta_kp,double theta_ki,double theta_kd);
     void InverseRotationDirectionDefinition(const bool ifInverse);
     int GetEncoderInterruptPin();
     double GetSpeed();
@@ -50,7 +49,7 @@ class BalanbotMotor{
     void UpdateControl(double phi,double theta);
     
     int GetWheelAngle();
-    void move(int speed, int direction);
+    //void move(int speed, int direction);
     
     void clears();
 

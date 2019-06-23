@@ -22,7 +22,7 @@ class PIDController{
 		void GetEffort(double &pEffort ,double &iEffort ,double &dEffort,double &effort);
 		double GetReference();
 		double Update(double feedback);
-		
+		void clear();
 };
 
 #endif //CONTROLLER_H
