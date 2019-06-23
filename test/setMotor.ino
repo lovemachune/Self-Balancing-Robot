@@ -28,8 +28,8 @@ void setMotor()
     motorA.SetMotorPins(PWMA, AIN1, AIN2, STBY);
     motorB.SetMotorPins(PWMB, BIN1, BIN2, STBY);
 
-    //motorA.SetDefaultPWM(30);
-    //motorB.SetDefaultPWM(10);
+    motorA.SetDefaultPWM(0);
+    motorB.SetDefaultPWM(0);
 
     motorA.SetEncoderPins(A_Interrupt, A_Direction);
     motorB.SetEncoderPins(B_Interrupt, B_Direction);
