@@ -31,15 +31,15 @@ float speedA, speedB;
 char key;
 
 //pid
-int mode = BalanbotMotor::PHI_CONTROL; //QUICK_POSITION_CONTROL PHI_CONTROL
-double reference =   0.018*0.5;             //0.018*1.5;//0.018*0.6//0.018*-0.3;
+int mode = BalanbotMotor::QUICK_POSITION_CONTROL; //QUICK_POSITION_CONTROL PHI_CONTROL
+double reference =  0.018*0.3; ;//0.018;//0.018*0.3;             //0.018*1.5;//0.018*0.6//0.018*-0.3;
 double theta_reference = 0; 
 double interror = 0;
 double olderror = 0;
+ 
+double kpA = 25, kiA = 240, kdA = 0.4;  //1 2
+//double kpA = 30, kiA = 260, kdA = 0.5;  //3
 
-//double kpA = 22, kiA = 248, kdA = 0.49;
-//double kpA = 25, kiA = 228, kdA = 0.52; best
-double kpA = 25, kiA = 240, kdA = 0.4;
 double kpB = 18, kiB = 200, kdB = 0.56;
 double theta_kpA = 0.01, theta_kiA = 0, theta_kdA = 0.001;
 //double theta_kpB = 0.05, theta_kiB = 0, theta_kdB = 0.008;
@@ -54,6 +54,12 @@ int STEP,NEXT_STEP;
 double angle_temp;
 const int STEP_PATTERN[] =  {1,2,1,2,7,3,4,5,6,0,0,0,0,0,0,0,0};
 bool ChangeSTEP,BALANCE;
+
+
+bool START = false;
+bool END = false;
+bool STRAIT = true;
+bool RUNNING = false;
 void TimerInterrupt()
 {
     sei();
@@ -68,7 +74,40 @@ void TimerInterrupt()
     currentAngleB = motorB.GetWheelAngle();
     wheelAngleB = currentAngleB*pi/180;
     wheelAngleA = -currentAngleA*pi/180;
+    
+    ///////////////////////////////////////
     /*
+    if(STRAIT)
+      {
+        if(wheelAngleA-wheelAngleB < -0.01)
+          motorA.SetDefaultPWM(5);
+        else if(wheelAngleA-wheelAngleB > 0.01)
+          motorA.SetDefaultPWM(-5);
+        else
+          motorA.SetDefaultPWM(0);
+      }
+    if(START){
+      if(wheelAngleB-wheelAngleA > 7.5 || wheelAngleB-wheelAngleA < -7.5)  
+      {
+        motorA.SetDefaultPWM(0);
+        motorB.SetDefaultPWM(0);
+        motorA.clears();
+        motorB.clears();
+        reference = 0.024;
+        motorA.SetControl(mode, reference,kpA,kiA,kdA,0,0,0,0);
+        motorB.SetControl(mode, reference,kpA,kiA,kdA,0,0,0,0);
+        STRAIT = true;
+        RUNNING = false;
+      }
+      if(END)
+      {
+        if(time_count == REST_TIME)
+          return;
+        time_count = time_count+1;
+      }
+    }*/
+    //////////////////////////////////////////////////////////////////
+    
     switch(STEP){
       case 0: //take a break
         if(ChangeSTEP){
@@ -104,7 +143,7 @@ void TimerInterrupt()
         if(ChangeSTEP){
           ChangeSTEP=false;
           mode = BalanbotMotor::QUICK_POSITION_CONTROL;
-          theta_reference = 10*pi;
+          theta_reference = 9*pi;
           motorA.SetControl(mode, reference,kpA,kiA,kdA,theta_reference,theta_kpA, theta_kiA, theta_kdA);
           motorB.SetControl(mode, reference,kpA,kiA,kdA,theta_reference,theta_kpA, theta_kiA, theta_kdA);
         }
@@ -200,7 +239,7 @@ void TimerInterrupt()
           ChangeSTEP=false;
           mode = BalanbotMotor::PHI_CONTROL;
           reference = 0.025;
-          theta_reference = 15*pi;
+          theta_reference = 13*pi;
           motorA.SetControl(mode, reference,kpA,kiA,kdA,theta_reference,theta_kpA, theta_kiA, theta_kdA);
           motorB.SetControl(mode, reference,kpA,kiA,kdA,theta_reference,theta_kpA, theta_kiA, theta_kdA);
         }
@@ -210,9 +249,9 @@ void TimerInterrupt()
           motorB.SetDefaultPWM(0);
         }
         else if( (wheelAngleA-wheelAngleB) < 0.31*wheelAngleB)
-          motorA.SetDefaultPWM(7);
+          motorA.SetDefaultPWM(5);
         else
-          motorA.SetDefaultPWM(-10);
+          motorA.SetDefaultPWM(-7);
           
         
         if(((wheelAngleB - theta_reference < 0.1*pi)&(wheelAngleB - theta_reference > 0)) || ((wheelAngleB - theta_reference > -0.1*pi)&(wheelAngleB - theta_reference < 0)))
@@ -290,7 +329,7 @@ void TimerInterrupt()
           ChangeSTEP=false;
           mode = BalanbotMotor::PHI_CONTROL;
           reference = 0.025;
-          theta_reference = 10*pi;
+          theta_reference = 9.5*pi;
           motorA.SetControl(mode, reference,kpA,kiA,kdA,0,0,0,0);
           motorB.SetControl(mode, reference,kpA,kiA,kdA,0,0,0,0);
         }
@@ -313,7 +352,7 @@ void TimerInterrupt()
         }
         break;
     }
-    */
+    
     motorA.Update(phi,wheelAngleB);
     motorB.Update(phi,wheelAngleB);
     //Serial.println(String(phi));
@@ -322,8 +361,10 @@ void TimerInterrupt()
 
 void setup() {
   mpuSetup();
+  
   MsTimer2::set(dT*500, TimerInterrupt);
   MsTimer2::start();
+  
   setMotor();
   Serial.begin(57600);
   myBT.begin(57600);
@@ -338,15 +379,6 @@ int i;
 void loop() {
   // put your main code here, to run repeatedly:
   //btData();
-  while (myBT.available()) {
-  inReceive = true;
-  val = BT2.read();
-  bluetooth_data += val;
-  }
-  if(inReceive)
-  {
-    inReceive = false;
-    Serial.println(bluetooth_data);
-    bluetooth_data = "";
-  }
+  //R_PI_data();
+  //delay(50);
 }
